@@ -1,2 +1,1 @@
-# DockerComposeSonarQube
-SonarQube using docker-compose
+# SonarQube using docker-compose
