@@ -1,0 +1,50 @@
+version: '3.1'
+
+services:
+  # https://docs.sonarqube.org/latest/setup/install-server/#header-3
+  # Check https://hub.docker.com/_/sonarqube/?tab=tags for all possible versions
+    sonarQube:
+        container_name: sonarqube-server
+        image: sonarqube:8.3-community
+        restart: "no"
+        # Wait for sonar to (hopefully) stop all current tasks before stopping the container
+        stop_grace_period: 3600s
+        ports:
+            - "9000:9000"
+        networks:
+            - sonarnetwork
+        volumes:        
+            - sonarqube_data:/opt/sonarqube/data
+            - sonarqube_extensions:/opt/sonarqube/extensions
+            - sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins        
+        environment:
+            SONAR_JDBC_URL: jdbc:postgresql://dbPostgres/sonarqube
+            SONAR_JDBC_USERNAME: root
+            SONAR_JDBC_PASSWORD: yourp@ssw0rd
+        depends_on: 
+            - dbPostgres
+
+    # Check https://hub.docker.com/_/postgres?tab=tags for all possible versions
+    dbPostgres:
+        container_name: sonarqube-postgresdb
+        image: postgres:12.2-alpine        
+        restart: on-failure
+        networks:
+            - sonarnetwork
+        volumes:
+            - postgresql:/var/lib/postgresql
+            - postgresql_data:/var/lib/postgresql/data
+        environment:    
+            - POSTGRES_USER=root
+            - POSTGRES_PASSWORD=yourp@ssw0rd
+            - POSTGRES_DB=sonarqube
+    
+networks:
+    sonarnetwork:
+
+volumes:    
+    sonarqube_data:
+    sonarqube_extensions:
+    sonarqube_bundled-plugins:
+    postgresql:
+    postgresql_data:
